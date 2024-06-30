@@ -1,14 +1,17 @@
+
 import streamlit as st
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import openai
+import time
 from openai import OpenAI
+
+# Load the API key from Streamlit secrets
+openai_api_key = st.secrets["openai"]["api_key"]
 
 # Initialize OpenAI client
 client = OpenAI(api_key=st.secrets["openai_key"])
-
 
 # Load and preprocess the data
 @st.cache_data
@@ -34,19 +37,24 @@ def semantic_search(query, df, vectorizer, top_k=5):
 # Generate response using OpenAI
 def generate_response(query, context):
     prompt = f"Context: {context}\n\nQuestion: {query}\n\nAnswer:"
-    response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant. Use the provided context to answer the question."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=1,
-        max_tokens=256,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0
-    )
-    return response.choices[0].message.content
+    while True:
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant. Use the provided context to answer the question."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=1,
+                max_tokens=256,
+                top_p=1,
+                frequency_penalty=0,
+                presence_penalty=0
+            )
+            return response.choices[0].message["content"].strip()
+        except openai.error.RateLimitError:
+            st.warning("Rate limit exceeded. Waiting for 10 seconds before retrying...")
+            time.sleep(10)
 
 # Streamlit app
 st.set_page_config(page_title="RAG App", layout="wide")
