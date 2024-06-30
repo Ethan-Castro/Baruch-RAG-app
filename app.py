@@ -6,7 +6,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 import openai
 
 # Initialize OpenAI client
-client = openai(api_key=st.secrets["openai_key"])
+openai.api_key = st.secrets["openai_key"]
+
 
 # Load and preprocess the data
 @st.cache_data
