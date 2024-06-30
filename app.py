@@ -50,7 +50,9 @@ def generate_response(query, context):
                 presence_penalty=0
             )
             return response.choices[0].message["content"].strip()
-        
+        except openai.error.RateLimitError:
+            st.warning("Rate limit exceeded. Waiting for 10 seconds before retrying...")
+            time.sleep(10)
 
 # Streamlit app
 st.set_page_config(page_title="RAG App", layout="wide")
