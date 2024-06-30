@@ -7,8 +7,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 import time
 from openai import OpenAI
 
-# Load the API key from Streamlit secrets
-openai_api_key = st.secrets["openai"]["api_key"]
 
 # Initialize OpenAI client
 client = OpenAI(api_key=st.secrets["openai_key"])
