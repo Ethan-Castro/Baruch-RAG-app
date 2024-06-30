@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import openai
+from openai import OpenAI
 
 # Initialize OpenAI client
 client = OpenAI(api_key=st.secrets["openai_key"])
