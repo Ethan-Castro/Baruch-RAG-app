@@ -5,8 +5,6 @@ import openai
 # Load the API key from Streamlit secrets
 openai.api_key = st.secrets['openai_key']
 
-
-
 # Load the CSV file
 @st.cache_data
 def load_data(file):
@@ -15,7 +13,7 @@ def load_data(file):
 
 # Function to get a response from OpenAI API
 def get_openai_response(context):
-    response = client.chat.completions.create(
+    response = openai.ChatCompletion.create(
         model="gpt-4o",
         messages=[{"role": "user", "content": context}],
         temperature=1,
