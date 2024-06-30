@@ -8,10 +8,12 @@ from openai import OpenAI
 # Initialize OpenAI client
 client = OpenAI(api_key=st.secrets["openai_key"])
 
-# Load and preprocess the data
+
+# Load the specific CSV file
 @st.cache_data
-def load_data(file):
-    df = pd.read_csv(file)
+def load_data():
+    # Replace 'your_file.csv' with the path to your actual CSV file
+    df = pd.read_csv('your_file.csv')
     return df
 
 # TF-IDF Vectorizer
@@ -21,6 +23,9 @@ def get_vectorizer():
 
 # Semantic search function using TF-IDF
 def semantic_search(query, df, vectorizer, top_k=5):
+    # Convert text column to string and handle NaN values
+    df['text'] = df['text'].fillna('').astype(str)
+    
     tfidf_matrix = vectorizer.fit_transform(df['text'])
     query_vector = vectorizer.transform([query])
     similarities = cosine_similarity(query_vector, tfidf_matrix).flatten()
@@ -51,27 +56,26 @@ st.set_page_config(page_title="RAG App", layout="wide")
 
 st.title("🧠 Retrieval Augmented Generation App")
 
-# File uploader
-uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
+# Load the data
+df = load_data()
+vectorizer = get_vectorizer()
 
-if uploaded_file is not None:
-    df = load_data(uploaded_file)
-    vectorizer = get_vectorizer()
+# Display information about the dataset
+st.subheader("Dataset Information")
+st.write(f"Number of records: {len(df)}")
+st.write(f"Columns: {', '.join(df.columns)}")
 
-    st.sidebar.header("Settings")
-    top_k = st.sidebar.slider("Number of relevant documents", 1, 10, 5)
+# Settings in sidebar
+st.sidebar.header("Settings")
+text_column = st.sidebar.selectbox("Select the column containing the text data", df.columns)
+top_k = st.sidebar.slider("Number of relevant documents", 1, 10, 5)
 
-    # Display the first few rows of the CSV
-    st.subheader("Preview of uploaded CSV")
-    st.write(df.head())
+# Main interface
+st.subheader("Ask a question about the data")
+query = st.text_input("Enter your question:")
 
-    # Let user select the text column
-    text_column = st.selectbox("Select the column containing the text data", df.columns)
-
-    st.subheader("Ask a question")
-    query = st.text_input("Enter your question:")
-
-    if query and text_column:
+if query:
+    try:
         # Use the selected text column
         df['text'] = df[text_column]
         
@@ -89,9 +93,9 @@ if uploaded_file is not None:
 
         st.subheader("Generated Answer")
         st.success(answer)
-
-else:
-    st.info("Please upload a CSV file to get started.")
+    except Exception as e:
+        st.error(f"An error occurred: {str(e)}")
+        st.error("Please ensure that the selected column contains valid text data.")
 
 # Styling
 st.markdown("""
