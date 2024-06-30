@@ -5,8 +5,7 @@ import openai
 # Load the API key from Streamlit secrets
 openai.api_key = st.secrets['openai_key']
 
-# Initialize the OpenAI client
-client = OpenAI(api_key=openai_api_key)
+
 
 # Load the CSV file
 @st.cache_data
