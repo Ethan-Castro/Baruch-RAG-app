@@ -1,7 +1,6 @@
-!pip install openai
 import streamlit as st
 import pandas as pd
-import openai 
+import openai
 
 # Load the API key from Streamlit secrets
 openai.api_key = st.secrets['openai_key']
