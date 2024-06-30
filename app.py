@@ -1,17 +1,17 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import time
-import openai
-import openai.error
 from openai import OpenAI
+import openai
 
+# Load the API key from Streamlit secrets
+openai_api_key = st.secrets["openai"]["api_key"]
 
 # Initialize OpenAI client
-client = OpenAI(api_key=st.secrets["openai_key"])
+client = OpenAI(api_key=openai_api_key)
 
 # Load and preprocess the data
 @st.cache_data
@@ -52,9 +52,13 @@ def generate_response(query, context):
                 presence_penalty=0
             )
             return response.choices[0].message["content"].strip()
-        except openai.error.RateLimitError:
-            st.warning("Rate limit exceeded. Waiting for 10 seconds before retrying...")
-            time.sleep(10)
+        except openai.error.OpenAIError as e:
+            if "rate limit" in str(e).lower():
+                st.warning("Rate limit exceeded. Waiting for 10 seconds before retrying...")
+                time.sleep(10)
+            else:
+                st.error(f"An error occurred: {e}")
+                return "Error generating response."
 
 # Streamlit app
 st.set_page_config(page_title="RAG App", layout="wide")
@@ -122,3 +126,5 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
+
+
