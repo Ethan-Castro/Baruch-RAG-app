@@ -47,9 +47,7 @@ def generate_response(query, context):
                 presence_penalty=0
             )
             return response['choices'][0]['message']['content'].strip()
-        except openai.error.OpenAIError as e:
-            st.error(f"An error occurred: {e}")
-            break
+       
 
 # Streamlit app
 st.set_page_config(page_title="RAG App", layout="wide")
