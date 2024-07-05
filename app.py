@@ -1,16 +1,12 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import time
 import openai
-from openai import OpenAI
-
 
 # Initialize OpenAI client
-client = OpenAI(api_key=st.secrets["openai_key"])
+openai.api_key = st.secrets["openai_key"]
 
 # Load and preprocess the data
 @st.cache_data
@@ -38,8 +34,8 @@ def generate_response(query, context):
     prompt = f"Context: {context}\n\nQuestion: {query}\n\nAnswer:"
     while True:
         try:
-            response = client.chat.completions.create(
-                model="gpt-4o",
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant. Use the provided context to answer the question."},
                     {"role": "user", "content": prompt}
@@ -50,9 +46,10 @@ def generate_response(query, context):
                 frequency_penalty=0,
                 presence_penalty=0
             )
-            return response.choices[0].message["content"].strip()
+            return response['choices'][0]['message']['content'].strip()
         except openai.error.OpenAIError as e:
-            error_message = str(e).lower()
+            st.error(f"An error occurred: {e}")
+            break
 
 # Streamlit app
 st.set_page_config(page_title="RAG App", layout="wide")
